@@ -1,0 +1,194 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="GooglepayFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">
+                \Apexx\Googlepay\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Apexx\Googlepay\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">GooglepayValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">GooglepayCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Configuration reader -->
+    <virtualType name="GooglepayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode"
+                      xsi:type="const">\Apexx\Googlepay\Model\Ui\ConfigProvider::CODE
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="GooglepayCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="authorize" xsi:type="string">GooglepayAuthorizeCommand</item>
+                <item name="capture" xsi:type="string">GooglepayCaptureCommand</item>
+                <item name="cancel" xsi:type="string">GooglepayCancelCommand</item>
+                <item name="void" xsi:type="string">GooglepayVoidCommand</item>
+                <item name="refund" xsi:type="string">GooglepayRefundCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorize command -->
+    <virtualType name="GooglepayAuthorizeCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder" xsi:type="object">GooglepayAuthorizationRequest</argument>
+            <argument name="handler" xsi:type="object">GooglepayResponseHandlerComposite</argument>
+            <argument name="transferFactory"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Http\TransferFactory</argument>
+            <argument name="client" xsi:type="object">Apexx\Googlepay\Gateway\Http\Client\ClientMock</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Authorization Request -->
+    <virtualType name="GooglepayAuthorizationRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="transaction"
+                      xsi:type="string">Apexx\Googlepay\Gateway\Request\AuthorizationRequest</item>
+                <!--<item name="mockData" xsi:type="string">Apexx\Googlepay\Gateway\Request\MockDataRequest</item>-->
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Apexx\Googlepay\Gateway\Request\AuthorizationRequest">
+        <arguments>
+            <argument name="config" xsi:type="object">GooglepayConfig</argument>
+        </arguments>
+    </type>
+
+    <!-- Capture command -->
+    <virtualType name="GooglepayCaptureCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder"
+                      xsi:type="object">GooglepayCaptureRequest</argument>
+            <argument name="handler"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Response\InvoiceCaptureHandler</argument>
+            <argument name="transferFactory"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Http\TransferFactory</argument>
+            <argument name="validator"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Validator\ResponseCaptureValidator
+            </argument>
+            <argument name="client" xsi:type="object">Apexx\Googlepay\Gateway\Http\Client\CaptureSale
+            </argument>
+        </arguments>
+    </virtualType>
+    <!-- Capture Request -->
+    <virtualType name="GooglepayCaptureRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="capture" xsi:type="string">Apexx\Googlepay\Gateway\Request\CaptureDataBuilder
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Cancel command -->
+    <virtualType name="GooglepayCancelCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder"
+                      xsi:type="object">GooglepayCancelRequest</argument>
+            <argument name="handler" xsi:type="object">Apexx\Googlepay\Gateway\Response\CancelHandler
+            </argument>
+            <argument name="transferFactory"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Http\TransferFactory</argument>
+            <argument name="validator"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Validator\ResponseCancelValidator</argument>
+            <argument name="client" xsi:type="object">Apexx\Googlepay\Gateway\Http\Client\CancelSale
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GooglepayCancelRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="cancel" xsi:type="string">Apexx\Googlepay\Gateway\Request\CancelDataBuilder
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Refund command -->
+    <virtualType name="GooglepayRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder"
+                      xsi:type="object">GooglepayRefundRequest</argument>
+            <argument name="handler" xsi:type="object">Apexx\Googlepay\Gateway\Response\RefundHandler
+            </argument>
+            <argument name="transferFactory"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Http\TransferFactory</argument>
+            <argument name="validator"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Validator\ResponseRefundValidator
+            </argument>
+            <argument name="client" xsi:type="object">Apexx\Googlepay\Gateway\Http\Client\RefundSale
+            </argument>
+        </arguments>
+    </virtualType>
+    <!-- Refund Request -->
+    <virtualType name="GooglepayRefundRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="refund" xsi:type="string">Apexx\Googlepay\Gateway\Request\RefundDataBuilder
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Void command -->
+    <virtualType name="GooglepayVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+        <arguments>
+            <argument name="requestBuilder"
+                      xsi:type="object">GooglepayVoidRequest</argument>
+            <argument name="handler" xsi:type="object">Apexx\Googlepay\Gateway\Response\VoidHandler
+            </argument>
+            <argument name="transferFactory"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Http\TransferFactory</argument>
+            <argument name="validator"
+                      xsi:type="object">Apexx\Googlepay\Gateway\Validator\ResponseVoidValidator</argument>
+            <argument name="client" xsi:type="object">Apexx\Googlepay\Gateway\Http\Client\VoidSale
+            </argument>
+        </arguments>
+    </virtualType>
+    <!-- Void Request -->
+    <virtualType name="GooglepayVoidRequest" type="Magento\Payment\Gateway\Request\BuilderComposite">
+        <arguments>
+            <argument name="builders" xsi:type="array">
+                <item name="void" xsi:type="string">Apexx\Googlepay\Gateway\Request\VoidDataBuilder
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Response handlers -->
+    <virtualType name="GooglepayResponseHandlerComposite" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="txnid" xsi:type="string">Apexx\Googlepay\Gateway\Response\TxnIdHandler</item>
+                <item name="fraud" xsi:type="string">Apexx\Googlepay\Gateway\Response\FraudHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Value handlers infrastructure -->
+    <virtualType name="GooglepayValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">GooglepayConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="GooglepayConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">GooglepayConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Apexx\Googlepay\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">GooglepayConfig</argument>
+        </arguments>
+    </type>
+</config>

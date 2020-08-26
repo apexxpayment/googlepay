@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="payment_method_assign_data">
+        <observer name="googlepay_payment_gateway_data_assign"
+                  instance="Apexx\Googlepay\Observer\DataAssignObserver" />
+    </event>
+    <!-- Restrict Googlepay Payment method for Guest Users -->
+   <!--  <event name="payment_method_is_active">
+        <observer name="restrict_googlepay_payment_guestcustomer" instance="Apexx\Googlepay\Observer\DisabledGooglepayGuest" />
+    </event> -->
+    <!-- Restrict Googlepay Payment method depends on currency -->
+    <event name="payment_method_is_active">
+        <observer name="restrict_googlepay_payment_currency" instance="Apexx\Googlepay\Observer\DisabledGooglepayCurrency" />
+    </event>
+
+     <event name="sales_order_place_after">
+        <observer name="apexx_googlepay_payment_place_order_after" instance="Apexx\Googlepay\Observer\OrderObserver" />
+    </event>
+    
+</config>
